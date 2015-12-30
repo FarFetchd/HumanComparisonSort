@@ -302,7 +302,7 @@ function mergeSort(items)
 function fnc_Sort(int_SelectID)
 {
 	int_Completed++;
-	accessPromise.resolve(int_SelectID);
+	accessToPromise.resolve(int_SelectID);
 }
 
 function fnc_ShowData(leftData, rightData, sortingDone)
