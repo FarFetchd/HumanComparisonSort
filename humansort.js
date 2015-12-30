@@ -261,21 +261,20 @@ function hwangLinMerge(A, B)
 		{
 			//Binary insert A[m] into the part of B right of x. This takes care of A[m]: 
 			//we know that {A[m]} ~ {B right of A[m]} goes at the end of the result.
-			//So, if we let D = {B right of A[m]}, then we should recurse like:
-			//return HLMerge(A up to but not including m, B - D) ~ {A[m]} ~ D
+			//So, if we let D = {B starting from A[m]'s new spot}, then we should recurse like:
+			//return HLMerge(A with A[m] removed), B - D) ~ D
 			
-			var B_x_plus1_to_end = B.slice(i1to0(x+1));
-			return binaryInsert(B_x_plus1_to_end, A[i1to0(smaller_m)], 0, B_x_plus1_to_end.length).then(function(Am_dest_ind)
+			return binaryInsert(B, A[i1to0(smaller_m)], i1to0(x+1), B.length).then(function(Am_dest_ind)
 			{
-				var AmD = B_x_plus1_to_end.slice(Am_dest_ind);
-				AmD.splice(0, 0, A[i1to0(smaller_m)]);
-				
-				var B_minus_D = B.slice(0, i1to0(x+1));
+				B.splice(Am_dest_ind, 0, A[i1to0(smaller_m)]);
 				A = A.slice(0, A.length-1);
 				
-				return hwangLinMerge(A, B_minus_D).then(function(mergedResult)
+				var D = B.slice(Am_dest_ind);
+				var B_minus_D = B.slice(0, Am_dest_ind);
+				
+				return hwangLinMerge(A, B_minus_D).then(function(AB_minus_D_merged)
 				{
-					return mergedResult.concat(AmD);
+					return AB_minus_D_merged.concat(D);
 				});
 			});
 		}

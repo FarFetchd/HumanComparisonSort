@@ -162,22 +162,18 @@ std::vector<Entry*> hwangLinMerge(std::vector<Entry*> _A_, std::vector<Entry*> _
 	{
 		//Binary insert A[m] into the part of B right of x. This takes care of A[m]: 
 		//we know that {A[m]} ~ {B right of A[m]} goes at the end of the result.
-		//So, if we let D = {B right of A[m]}, then we should recurse like:
-		//return HLMerge(A up to but not including m, B - D) ~ {A[m]} ~ D
+		//So, if we let D = {B starting from A[m]'s new spot}, then we should recurse like:
+		//return HLMerge(A with A[m] removed), B - D) ~ D
 		
-		std::vector<Entry*> B_x_plus1_to_end(B.begin() + i1to0(x+1), B.end());
-		int Am_dest_ind = binaryInsert(B_x_plus1_to_end, A[i1to0(smaller_m)], 0, B_x_plus1_to_end.size());
+		int Am_dest_ind = binaryInsert(B, A[i1to0(smaller_m)], i1to0(x+1), B.size());
+		B.insert(B.begin() + Am_dest_ind, A[i1to0(smaller_m)]);
+		A.pop_back();
 		
-		std::vector<Entry*> AmD;
-		AmD.push_back(A[i1to0(smaller_m)]);
-		AmD.insert(AmD.end(), B_x_plus1_to_end.begin()+Am_dest_ind, B_x_plus1_to_end.end());
+		std::vector<Entry*> D (B.begin() + Am_dest_ind, B.end());
+		std::vector<Entry*> B_minus_D(B.begin(), B.begin() + Am_dest_ind);
 		
-		
-		std::vector<Entry*> B_minus_D(B.begin(), B.begin() + i1to0(x+1));
-		A.pop_back();		
 		std::vector<Entry*> AB_merged = hwangLinMerge(A, B_minus_D);
-		
-		AB_merged.insert(AB_merged.end(), AmD.begin(), AmD.end());
+		AB_merged.insert(AB_merged.end(), D.begin(), D.end());
 		return AB_merged;
 	}
 }
