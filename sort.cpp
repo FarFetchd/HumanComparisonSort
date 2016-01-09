@@ -123,7 +123,6 @@ int binaryInsert(std::vector<Entry*> const& items, Entry* inserting, int left_bo
 }
 
 
-int i1to0(int idx) {return idx - 1;}
 std::vector<Entry*> hwangLinMerge(std::vector<Entry*> _A_, std::vector<Entry*> _B_)
 {
 	//!!!'A' must always be the smaller array!!!
@@ -143,17 +142,20 @@ std::vector<Entry*> hwangLinMerge(std::vector<Entry*> _A_, std::vector<Entry*> _
 	
 	int larger_n = B.size();
 	int smaller_m = A.size();
-	
 	int alpha = (int)log2((double)larger_n / (double)smaller_m);
 	int x = larger_n - (1 << alpha) + 1;
+	//===============================================================
+	//ABOVE: smaller_m, larger_n, alpha, and x are ONE-BASED indices
+	larger_n--; smaller_m--; alpha--; x--;
+	//BELOW: smaller_m, larger_n, alpha, and x are ZERO-BASED indices
+	//===============================================================
 	
-	//INDEXING FROM ONE EVERYWHERE. In the non-pseudo-code, i1to0 handles it; i.e. the input to i1to0 is a 1-based index.
-	if(*A[i1to0(smaller_m)] <= *B[i1to0(x)])
+	if(*A[smaller_m] <= *B[x])
 	{
 		//This case is: return hwangLinMerge(A, B[1 until x]) ~ B[x through end]
 		
-		std::vector<Entry*> B_until_x(B.begin(), B.begin() + i1to0(x));
-		std::vector<Entry*> B_x_to_end(B.begin() + i1to0(x), B.end());
+		std::vector<Entry*> B_until_x(B.begin(), B.begin() + x);
+		std::vector<Entry*> B_x_to_end(B.begin() + x, B.end());
 		
 		std::vector<Entry*> AB_merged = hwangLinMerge(A, B_until_x);
 		AB_merged.insert(AB_merged.end(), B_x_to_end.begin(), B_x_to_end.end());
@@ -166,8 +168,8 @@ std::vector<Entry*> hwangLinMerge(std::vector<Entry*> _A_, std::vector<Entry*> _
 		//So, if we let D = {B starting from A[m]'s new spot}, then we should recurse like:
 		//return HLMerge(A with A[m] removed), B - D) ~ D
 		
-		int Am_dest_ind = binaryInsert(B, A[i1to0(smaller_m)], i1to0(x+1), B.size());
-		B.insert(B.begin() + Am_dest_ind, A[i1to0(smaller_m)]);
+		int Am_dest_ind = binaryInsert(B, A[smaller_m], x+1, B.size());
+		B.insert(B.begin() + Am_dest_ind, A[smaller_m]);
 		A.pop_back();
 		
 		std::vector<Entry*> D (B.begin() + Am_dest_ind, B.end());

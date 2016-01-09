@@ -150,7 +150,6 @@ function tinySort(items)
 }
 
 
-function i1to0(i) {return i-1;}
 //(returns promise of the merged result)
 function hwangLinMerge(A, B)
 {
@@ -182,15 +181,20 @@ function hwangLinMerge(A, B)
 	var alpha = Math.floor(Math.log2(larger_n / smaller_m));
 	var x = larger_n - Math.pow(2,alpha) + 1;
 	
-	//INDEXING FROM ONE EVERYWHERE. In the non-pseudo-code, i1to0 handles it; i.e. the input to i1to0 is a 1-based index.
-	return asyncCompare(A[i1to0(smaller_m)], B[i1to0(x)]).then(function(compareResult)
+	//===============================================================
+	//ABOVE: smaller_m, larger_n, alpha, and x are ONE-BASED indices
+	larger_n--; smaller_m--; alpha--; x--;
+	//BELOW: smaller_m, larger_n, alpha, and x are ZERO-BASED indices
+	//===============================================================
+	
+	return asyncCompare(A[smaller_m], B[x]).then(function(compareResult)
 	{
 		if(compareResult == -1)//if(A[smaller_m] <= B[x])
 		{
 			//This case is: return hwangLinMerge(A, B[1 until x]) ~ B[x through end]
 			
-			var B_until_x = B.slice(0, i1to0(x));
-			var B_x_to_end = B.slice(i1to0(x));
+			var B_until_x = B.slice(0, x);
+			var B_x_to_end = B.slice(x);
 			
 			return hwangLinMerge(A, B_until_x).then(function(mergedResult)
 			{
@@ -204,9 +208,9 @@ function hwangLinMerge(A, B)
 			//So, if we let D = {B starting from A[m]'s new spot}, then we should recurse like:
 			//return HLMerge(A with A[m] removed), B - D) ~ D
 			
-			return binaryInsert(B, A[i1to0(smaller_m)], i1to0(x+1), B.length).then(function(Am_dest_ind)
+			return binaryInsert(B, A[smaller_m], x+1, B.length).then(function(Am_dest_ind)
 			{
-				B.splice(Am_dest_ind, 0, A[i1to0(smaller_m)]);
+				B.splice(Am_dest_ind, 0, A[smaller_m]);
 				A = A.slice(0, A.length-1);
 				
 				var D = B.slice(Am_dest_ind);
