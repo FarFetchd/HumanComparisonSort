@@ -147,7 +147,7 @@ std::vector<Entry*> processDataDir(std::string dir_name)
 	return all_items;
 }
 
-bool Entry::operator<=(Entry& other) //non-const ref and non-const function so we can count comparisons
+bool Entry::actualCompareLT(Entry& other)
 {
 	if(my_type == Testing)
 	{
@@ -208,6 +208,61 @@ bool Entry::operator<=(Entry& other) //non-const ref and non-const function so w
 		cerr << "Unhandled enum type in Entry::operator<=()!" << endl;
 	assert(false);
 	return false;
+}
+
+void Entry::addMeToAllWorse(std::vector<Entry*> superior_ones)
+{
+	for(Entry* each : superior_ones)
+	{
+		each->worse_than_me[orig_order_id] = this;
+		better_than_me[each->orig_order_id] = each;
+	}
+}
+
+bool Entry::operator<=(Entry& other) //non-const ref and non-const function so we can count comparisons
+{
+#ifdef _MEMOIZE_COMPARISONS_
+	auto found_better = better_than_me.find(other.orig_order_id);
+	auto found_worse = worse_than_me.find(other.orig_order_id);
+	if(found_better != better_than_me.end())
+		return false;
+	else if(found_worse != worse_than_me.end())
+		return true;
+	else //if(not in either found_better or found_worse)
+	{
+		//two sets: superior = {this + this->better_than_me} and inferior = {other + other->worse_than_me}
+		std::vector<Entry*> superior; //each item should have everything in inferior in its worse_than_me
+		std::vector<Entry*> inferior; //each item should have everything in superior in its better_than_me
+		
+		bool better_than_other = actualCompareLT(other);
+		
+		if(better_than_other)
+		{
+			superior.push_back(this);
+			for(auto& each : better_than_me)
+				superior.push_back(each.second);
+			
+			inferior.push_back(&other);
+			for(auto& each : other.worse_than_me)
+				inferior.push_back(each.second);
+		}
+		else //not better than other
+		{
+			inferior.push_back(this);
+			for(auto& each : worse_than_me)
+				inferior.push_back(each.second);
+			
+			superior.push_back(&other);
+			for(auto& each : other.better_than_me)
+				superior.push_back(each.second);
+		}
+		for(Entry* each : inferior)
+			each->addMeToAllWorse(superior);
+		return better_than_other;
+	}
+#else //(not) _MEMOIZE_COMPARISONS_
+	return actualCompareLT(other);
+#endif
 }
 
 bool Entry::operator<(Entry& other) //non-const ref and non-const function so we can count comparisons

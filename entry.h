@@ -21,6 +21,9 @@
 
 #include <string>
 #include <vector>
+#include <unordered_map>
+
+#include "algorithm_control.h"
 
 extern int g_num_entries_created;
 
@@ -33,6 +36,14 @@ class Entry
 private:
 	int orig_order_id;
 	EntryType my_type; //hooray for hacky polymorphism.... :-/
+	
+	std::unordered_map<int, Entry*> better_than_me;
+	std::unordered_map<int, Entry*> worse_than_me;
+	
+	//the overloaded operators are memoized wrappers of this
+	bool actualCompareLT(Entry& other);
+	
+	void addMeToAllWorse(std::vector<Entry*> superior_ones);
 	
 public:
 	int getUniqueID() const { return orig_order_id; }

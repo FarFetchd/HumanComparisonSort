@@ -22,10 +22,11 @@
 #include "entry.h"
 #include "sort.h"
 #include "tiny_sort.h"
+#include "algorithm_control.h"
 
 std::vector<Entry*> mergeSort(std::vector<Entry*> items)
 {
-	if(items.size() <= 5)
+	if(items.size() <= TINY_SORT_THRESHOLD)
 		return tinySort(items);
 	
 	int split_ind = items.size() / 2;

@@ -15,18 +15,19 @@
 //The full text of the license can be found at:
 //http://www.gnu.org/licenses/gpl.html
 
-#ifndef __RANKING_INCLGUARD_SORT_H_
-#define __RANKING_INCLGUARD_SORT_H_
 
-#include <vector>
+#ifndef __RANKING_INCLGUARD_ALGORITHM_CONTROL_H_
+#define __RANKING_INCLGUARD_ALGORITHM_CONTROL_H_
 
-#include "algorithm_control.h"
-#include "entry.h"
+//comment out to go back to ordinary merge!
+#define _USE_HWANG_LIN_MERGE_
 
-std::vector<Entry*> mergeSort(std::vector<Entry*> items);
+//memoization of Entry::operator<=. If commented, duplicate comparisons will 
+//be presented to the user if the algorithm logic calls for it. (Hwang-Lin
+//mergesort with <=5 items sorted directly does appear to do so sometimes).
+#define _MEMOIZE_COMPARISONS_
 
-std::vector<Entry*> hwangLinMerge(std::vector<Entry*> A, std::vector<Entry*> B);
-std::vector<Entry*> basicMerge(std::vector<Entry*> left_sorted, std::vector<Entry*> right_sorted);
+//Use explicit sorting algorithm on arrays of <= this size
+#define TINY_SORT_THRESHOLD 5
 
-
-#endif //__RANKING_INCLGUARD_SORTS_H_
+#endif //__RANKING_INCLGUARD_ALGORITHM_CONTROL_H_
